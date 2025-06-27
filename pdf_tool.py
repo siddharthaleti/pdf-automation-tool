@@ -4,6 +4,7 @@ from PyPDF2 import PdfReader, PdfWriter
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.colors import Color
+import os
 
 root = tk.Tk()
 root.title("PDF Automation Tool")
@@ -67,6 +68,7 @@ def create_watermark_pdf(text, output_path):
 # -------------------------------
 # ADD WATERMARK
 # -------------------------------
+
 def add_watermark():
     # Ask for input PDF
     pdf_file = filedialog.askopenfilename(title="Select PDF to Add Watermark", filetypes=[("PDF files", "*.pdf")])
@@ -85,21 +87,31 @@ def add_watermark():
     # Ask for output file
     output_path = filedialog.asksaveasfilename(defaultextension=".pdf", filetypes=[("PDF files", "*.pdf")])
     if not output_path:
+        # Clean up watermark file if user cancels save dialog
+        if os.path.exists(watermark_pdf):
+            os.remove(watermark_pdf)
         return
 
-    # Merge watermark
-    reader = PdfReader(pdf_file)
-    watermark = PdfReader(watermark_pdf).pages[0]
-    writer = PdfWriter()
+    try:
+        # Merge watermark
+        reader = PdfReader(pdf_file)
+        watermark = PdfReader(watermark_pdf).pages[0]
+        writer = PdfWriter()
 
-    for page in reader.pages:
-        page.merge_page(watermark)  # transparency makes watermark look in background
-        writer.add_page(page)
+        for page in reader.pages:
+            page.merge_page(watermark)  # transparency makes watermark look in background
+            writer.add_page(page)
 
-    with open(output_path, "wb") as f_out:
-        writer.write(f_out)
+        with open(output_path, "wb") as f_out:
+            writer.write(f_out)
 
-    messagebox.showinfo("Success", f"Watermarked PDF saved to:\n{output_path}")
+        messagebox.showinfo("Success", f"Watermarked PDF saved to:\n{output_path}")
+
+    finally:
+        # Always delete temporary watermark PDF
+        if os.path.exists(watermark_pdf):
+            os.remove(watermark_pdf)
+
 
 
 # -------------------------------
