@@ -10,7 +10,7 @@ A simple Python GUI tool for merging, splitting, and adding transparent watermar
 
 ## Requirements
 
-- Python 3.6 or above
+- Python 3.6+
 - PyPDF2
 - reportlab
 
